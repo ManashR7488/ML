@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ML Quest — Interactive Machine Learning Curriculum</title>
+<meta name="description" content="A gamified, interactive path through Machine Learning with the best visual resources attached to every topic." />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- Tailwind -->
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          body: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="font-body antialiased selection:bg-fuchsia-500/40">
+
+  <!-- Background -->
+  <div class="aurora" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <!-- ============ HUD / Sticky header ============ -->
+  <header class="sticky top-0 z-40 glass border-x-0 border-t-0">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center gap-2 sm:gap-4">
+      <!-- Brand -->
+      <a href="index.html" class="flex items-center gap-2.5 shrink-0 group">
+        <div class="w-9 h-9 rounded-xl grad-line grid place-items-center shadow-glow group-hover:scale-105 transition">
+          <span class="text-lg">🧠</span>
+        </div>
+        <div class="leading-none hidden lg:block">
+          <div class="font-display font-bold text-[15px] tracking-tight">ML&nbsp;Quest</div>
+          <div class="text-[10px] text-white/40 mt-0.5">Learn ML, visually</div>
+        </div>
+      </a>
+
+      <!-- Nav -->
+      <nav class="flex items-center gap-1 p-1 rounded-2xl glass shrink-0">
+        <a href="index.html" class="nav-link nav-active"><span>🧭</span><span class="hidden sm:inline">Path</span></a>
+        <a href="badges.html" class="nav-link"><span>🏆</span><span class="hidden sm:inline">Trophy</span></a>
+        <a href="resource.html" class="nav-link"><span>🎮</span><span class="hidden sm:inline">Playgrounds</span></a>
+        <a href="calendar.html" class="nav-link"><span>📅</span><span class="hidden sm:inline">Calendar</span></a>
+      </nav>
+
+      <!-- Level badge -->
+      <div class="flex items-center gap-2.5 shrink-0">
+        <div class="relative w-10 h-10 grid place-items-center">
+          <div class="absolute inset-0 rounded-full grad-line opacity-90"></div>
+          <div class="absolute inset-[2px] rounded-full bg-ink grid place-items-center">
+            <span id="hud-level" class="font-display font-bold text-sm">1</span>
+          </div>
+        </div>
+        <div class="leading-none hidden xl:block">
+          <div class="text-[10px] uppercase tracking-widest text-white/40">Rank</div>
+          <div id="hud-rank" class="font-display font-semibold text-[13px] text-violet-200">Curious Mind</div>
+        </div>
+      </div>
+
+      <!-- XP bar (also acts as flexible spacer) -->
+      <div class="flex-1 min-w-0">
+        <div class="hidden sm:block">
+          <div class="flex items-center justify-between text-[10px] mb-1">
+            <span class="text-white/45 font-medium hidden md:inline">Experience</span>
+            <span id="hud-xp-text" class="text-cyan-200/80 font-semibold tabular-nums ml-auto">0 / 100 XP</span>
+          </div>
+          <div class="h-2.5 rounded-full bg-white/8 overflow-hidden relative">
+            <div id="hud-xp-fill" class="absolute inset-y-0 left-0 grad-line rounded-full transition-[width] duration-700" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall % -->
+      <div class="text-right shrink-0 hidden md:block">
+        <div id="hud-progress" class="font-display font-bold text-lg grad-text tabular-nums">0%</div>
+        <div class="text-[9px] uppercase tracking-widest text-white/40 -mt-1">complete</div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="btn-sound" title="Toggle sound" class="btn w-9 h-9 rounded-xl glass grid place-items-center hover:bg-white/10">
+          <span id="icon-sound" class="text-base">🔊</span>
+        </button>
+        <button id="btn-reset" title="Reset progress" class="btn w-9 h-9 rounded-xl glass grid place-items-center hover:bg-white/10">
+          <span class="text-base">↺</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="max-w-7xl mx-auto px-4 sm:px-6">
+
+    <!-- ============ HERO ============ -->
+    <section class="pt-12 sm:pt-16 pb-10">
+      <div class="grid lg:grid-cols-[1fr_auto] gap-10 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full glass mb-5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-white/70">roadmap.sh&nbsp;×&nbsp;28 visual playgrounds</span>
+          </div>
+          <h1 class="font-display font-bold text-4xl sm:text-6xl leading-[1.05] tracking-tight">
+            Your <span class="grad-text">Machine Learning</span><br />adventure starts here.
+          </h1>
+          <p class="mt-5 text-white/55 max-w-xl text-[15px] leading-relaxed">
+            Every topic in the ML roadmap, in order — each one paired with the exact interactive
+            visualization to <em>see</em> it come alive. Complete topics, earn XP, unlock phases,
+            and level up from <span class="text-violet-200">Curious Mind</span> to <span class="text-fuchsia-200">ML&nbsp;Master</span>.
+          </p>
+          <div class="mt-7 flex flex-wrap items-center gap-3">
+            <button id="btn-continue" class="btn px-5 py-3 rounded-2xl grad-line font-display font-semibold text-sm shadow-glow hover:shadow-[0_16px_50px_-12px_rgba(236,72,153,.8)]">
+              ▶&nbsp;&nbsp;Continue your quest
+            </button>
+            <div class="flex items-center gap-4 text-sm">
+              <div><span id="stat-topics" class="font-display font-bold text-white">0</span><span class="text-white/40">/<span id="stat-total">0</span> topics</span></div>
+              <div class="w-px h-4 bg-white/15"></div>
+              <a href="resource.html" class="hover:text-white transition"><span id="stat-resources" class="font-display font-bold text-white">0</span><span class="text-white/40">/28 tools</span></a>
+              <div class="w-px h-4 bg-white/15"></div>
+              <a href="badges.html" class="hover:text-white transition"><span id="stat-badges" class="font-display font-bold text-white">0</span><span class="text-white/40"> badges</span></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress ring -->
+        <div class="justify-self-center lg:justify-self-end">
+          <div class="relative w-52 h-52 sm:w-60 sm:h-60 grid place-items-center">
+            <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+              <defs>
+                <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#8b5cf6" />
+                  <stop offset="50%" stop-color="#ec4899" />
+                  <stop offset="100%" stop-color="#06b6d4" />
+                </linearGradient>
+              </defs>
+              <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="10" />
+              <circle id="ring-fill" cx="60" cy="60" r="52" fill="none" stroke="url(#ringGrad)" stroke-width="10"
+                stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"
+                style="transition: stroke-dashoffset 1s cubic-bezier(.2,.7,.2,1)" />
+            </svg>
+            <div class="absolute text-center">
+              <div id="ring-pct" class="font-display font-bold text-5xl grad-text tabular-nums">0%</div>
+              <div class="text-[11px] uppercase tracking-widest text-white/40 mt-1">journey complete</div>
+              <div id="ring-sub" class="text-[11px] text-white/50 mt-2">Level 1 · Curious Mind</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ JOURNEY + PHASES ============ -->
+    <section class="pb-8 grid lg:grid-cols-[240px_1fr] gap-8">
+      <!-- Journey rail (sticky) -->
+      <aside class="hidden lg:block">
+        <div class="sticky top-24">
+          <h3 class="font-display font-semibold text-xs uppercase tracking-widest text-white/40 mb-4 pl-1">The Path</h3>
+          <div id="journey" class="relative pl-1"></div>
+        </div>
+      </aside>
+
+      <!-- Phase cards -->
+      <div id="phases" class="space-y-5"></div>
+    </section>
+
+    <footer class="py-12 text-center text-white/35 text-xs">
+      Built from the <span class="text-white/55">roadmap.sh Machine Learning roadmap</span> +
+      <span class="text-white/55">"28 Sites to Learn ML Visually"</span> (@manashR7488).<br class="hidden sm:block" />
+      Progress is saved locally in your browser. Keep going. 🚀
+    </footer>
+  </main>
+
+  <!-- ============ Overlays ============ -->
+  <div id="toast-wrap" class="fixed top-20 right-4 z-50 flex flex-col gap-2.5 w-[300px] max-w-[calc(100vw-2rem)]"></div>
+
+  <div id="levelup" class="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none px-4">
+    <div class="card glass rounded-3xl p-8 sm:p-10 text-center max-w-sm w-full border-white/15">
+      <div class="text-6xl mb-4 inline-block" id="levelup-medal">🏅</div>
+      <div class="text-xs uppercase tracking-[0.3em] text-cyan-200/80 font-semibold">Level Up!</div>
+      <div class="font-display font-bold text-5xl grad-text my-2" id="levelup-level">2</div>
+      <div class="text-white/70 mb-1">You are now a</div>
+      <div class="font-display font-bold text-2xl text-fuchsia-200 mb-6" id="levelup-rank">Code Initiate</div>
+      <button id="levelup-close" class="btn w-full py-3 rounded-2xl grad-line font-display font-semibold shadow-glow">Continue&nbsp;→</button>
+    </div>
+  </div>
+
+  <canvas id="confetti" class="fixed inset-0 z-[45] pointer-events-none"></canvas>
+
+  <script src="app.js?v=4"></script>
+</body>
+</html>
